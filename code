@@ -1,0 +1,38 @@
+pip install SpeechRecognition
+pip install translate
+pip install gTTS
+pip install pydub
+
+
+import speech_recognition as sr
+from translate import Translator
+from gtts import gTTS
+from pydub import AudioSegment
+from pydub.playback import play
+
+def change_pitch_and_speed(audio, semitones, speed):
+    audio = audio.speedup(playback_speed=speed)
+    audio = audio.set_frame_rate(audio.frame_rate + int(semitones * 100))
+    return audio
+
+recognizer = sr.Recognizer()
+with sr.AudioFile("/content/drive/MyDrive/Original.wav") as source:
+    audio = recognizer.record(source)
+try:
+    original_text = recognizer.recognize_google(audio)
+except sr.UnknownValueError:
+    original_text = "Speech could not be recognized."
+
+
+translator = Translator(to_lang="hi")
+translated_text = translator.translate(original_text)
+
+tts = gTTS(translated_text, lang="hi")
+tts.save("cloned_speech.wav")
+
+cloned_audio = AudioSegment.from_file("cloned_speech.wav")
+cloned_audio = change_pitch_and_speed(cloned_audio, semitones=0, speed=1.0)
+
+cloned_audio.export("cloned_speech_modified1.mp3", format="mp3")
+
+play(cloned_audio)
